@@ -16,17 +16,25 @@ async function run() {
         await client.connect();
         const toolsCollection = client.db('toolsExpress').collection('tools');
         const reviewCollection = client.db('toolsExpress').collection('reviews');
+        const orderCollection = client.db('toolsExpress').collection('orders');
 
         app.get('/tools', async (req, res) => {
             const query = {};
             const result = await toolsCollection.find(query).toArray();
             res.send(result);
-        })
+        });
+
         app.get('/reviews', async (req, res) => {
             const query = {};
             const result = await reviewCollection.find(query).toArray();
             res.send(result);
-        })
+        });
+
+        app.post('/orders', async (req, res) => {
+            const order = req.body;
+            const result = await orderCollection.insertOne(order);
+            res.send(result);
+        });
 
     }
     finally {
