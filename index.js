@@ -15,10 +15,16 @@ async function run() {
     try {
         await client.connect();
         const toolsCollection = client.db('toolsExpress').collection('tools');
+        const reviewCollection = client.db('toolsExpress').collection('reviews');
 
         app.get('/tools', async (req, res) => {
             const query = {};
             const result = await toolsCollection.find(query).toArray();
+            res.send(result);
+        })
+        app.get('/reviews', async (req, res) => {
+            const query = {};
+            const result = await reviewCollection.find(query).toArray();
             res.send(result);
         })
 
