@@ -17,6 +17,7 @@ async function run() {
         const toolsCollection = client.db('toolsExpress').collection('tools');
         const reviewCollection = client.db('toolsExpress').collection('reviews');
         const orderCollection = client.db('toolsExpress').collection('orders');
+        const userCollection = client.db('toolsExpress').collection('users');
 
         app.get('/tools', async (req, res) => {
             const query = {};
@@ -36,9 +37,21 @@ async function run() {
             res.send(result);
         });
 
+        app.get('/users', async (req, res) => {
+            const query = {};
+            const result = await userCollection.find(query).toArray();
+            res.send(result);
+        });
+
         app.post('/orders', async (req, res) => {
             const order = req.body;
             const result = await orderCollection.insertOne(order);
+            res.send(result);
+        });
+
+        app.post('/users', async (req, res) => {
+            const user = req.body;
+            const result = await userCollection.insertOne(user);
             res.send(result);
         });
 
