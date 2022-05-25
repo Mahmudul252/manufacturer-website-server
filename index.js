@@ -54,6 +54,13 @@ async function run() {
             const result = await userCollection.insertOne(user);
             res.send(result);
         });
+
+        app.post('/reviews', async (req, res) => {
+            const review = req.body;
+            const result = await reviewCollection.insertOne(review);
+            res.send(result);
+        });
+
         app.delete('/orders/:id', async (req, res) => {
             const id = req.params.id;
             const query = { _id: ObjectId(id) };
