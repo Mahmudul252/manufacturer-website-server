@@ -70,20 +70,30 @@ async function run() {
 
         app.put('/users/:id', async (req, res) => {
             const id = req.params.id;
-            const userProfileInfo = req.body;
+            const userInfo = req.body;
             const filter = { _id: ObjectId(id) };
             const options = { upsert: true };
-            const updatedProfile = {
-                $set: {
-                    location: userProfileInfo.location,
-                    linkedIn: userProfileInfo.linkedIn,
-                    education: userProfileInfo.education
+            let updatedUser;
+            if (userInfo.role) {
+                updatedUser = {
+                    $set: {
+                        role: userInfo.role
+                    }
                 }
-            };
-            const result = await userCollection.updateOne(filter, updatedProfile, options);
+            }
+            else {
+                updatedUser = {
+                    $set: {
+                        location: userInfo.location,
+                        linkedIn: userInfo.linkedIn,
+                        education: userInfo.education,
+                        phone: userInfo.phone
+                    }
+                }
+            }
+            const result = await userCollection.updateOne(filter, updatedUser, options);
             res.send(result);
-        })
-
+        });
     }
     finally {
 
