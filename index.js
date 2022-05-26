@@ -66,6 +66,22 @@ async function run() {
             const query = { _id: ObjectId(id) };
             const result = await orderCollection.deleteOne(query);
             res.send(result);
+        });
+
+        app.put('/users/:id', async (req, res) => {
+            const id = req.params.id;
+            const userProfileInfo = req.body;
+            const filter = { _id: ObjectId(id) };
+            const options = { upsert: true };
+            const updatedProfile = {
+                $set: {
+                    location: userProfileInfo.location,
+                    linkedIn: userProfileInfo.linkedIn,
+                    education: userProfileInfo.education
+                }
+            };
+            const result = await userCollection.updateOne(filter, updatedProfile, options);
+            res.send(result);
         })
 
     }
