@@ -46,7 +46,6 @@ async function run() {
 
         app.post('/create-payment-intents', async (req, res) => {
             const { totalPrice } = req.body;
-            console.log(totalPrice);
             const amount = totalPrice * 100;
             const paymentIntent = await strip.paymentIntents.create({
                 amount: amount,
@@ -59,6 +58,20 @@ async function run() {
         app.post('/orders', async (req, res) => {
             const order = req.body;
             const result = await orderCollection.insertOne(order);
+            res.send(result);
+        });
+
+        app.put('/orders/:id', async (req, res) => {
+            const id = req.params.id;
+            const order = req.body;
+            const filter = { _id: ObjectId(id) };
+            const options = { upsert: true };
+            const updatedOrder = {
+                $set: {
+                    paid: order.paid
+                }
+            }
+            const result = await orderCollection.updateOne(filter, updatedOrder, options);
             res.send(result);
         });
 
