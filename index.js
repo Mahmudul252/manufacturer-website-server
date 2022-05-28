@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const port = process.env.PORT || 5000;
 const app = express();
-const strip = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 app.use(cors());
 app.use(express.json());
@@ -15,14 +15,13 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 
 function verifyJWT(req, res, next) {
     const authHeader = req.headers.authorization;
-    console.log(authHeader)
     if (!authHeader) {
         return res.status(401).send({ message: 'unAuthorized Access' });
     }
     const token = authHeader.split(' ')[1];
     jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, function (err, decoded) {
         if (err) {
-            res.status(403).send({ message: 'Forbidden Access' });
+            return res.status(403).send({ message: 'Forbidden Access' });
         }
         req.decoded = decoded;
         next();
@@ -45,7 +44,7 @@ async function run() {
 
         app.get('/reviews', async (req, res) => {
             const query = {};
-            const result = await reviewCollection.find(query).toArray();
+            const result = await reviewCollection.find(query).sort({ _id: -1 }).toArray();
             res.send(result);
         });
 
@@ -77,7 +76,7 @@ async function run() {
         app.post('/create-payment-intents', async (req, res) => {
             const { totalPrice } = req.body;
             const amount = totalPrice * 100;
-            const paymentIntent = await strip.paymentIntents.create({
+            const paymentIntent = await stripe.paymentIntents.create({
                 amount: amount,
                 currency: 'usd',
                 payment_method_types: ['card']
@@ -98,7 +97,8 @@ async function run() {
             const options = { upsert: true };
             const updatedOrder = {
                 $set: {
-                    paid: order.paid
+                    paymentStatus: order.paymentStatus,
+                    shippingStatus: order.shippingStatus
                 }
             }
             const result = await orderCollection.updateOne(filter, updatedOrder, options);
@@ -119,7 +119,6 @@ async function run() {
             const updatedUser = {
                 $set: { userEmail: email }
             }
-            console.log(user)
             const token = jwt.sign({ email: email }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' });
             const result = await userCollection.updateOne(filter, updatedUser, options);
             res.send({ result, token });
